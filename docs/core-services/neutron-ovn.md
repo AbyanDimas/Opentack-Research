@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Neutron & OVN (Networking) - OpenStack Research Documentation
+permalink: /docs/core-services/neutron-ovn/
 ---
 
 # Neutron: Software-Defined Networking with OVN
@@ -71,6 +72,6 @@ sudo sysctl -w net.ipv4.conf.default.rp_filter=0
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/nova-placement' | relative_url }}">&larr; Nova & Placement</a>
-  <a class="page-nav-btn" href="{{ '/storage-glance-cinder' | relative_url }}">Next: Glance & Cinder &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/nova-placement/' | relative_url }}">&larr; Nova & Placement</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/storage/' | relative_url }}">Next: Glance & Cinder &rarr;</a>
 </div>

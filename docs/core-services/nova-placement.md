@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Nova & Placement (Compute) - OpenStack Research Documentation
+permalink: /docs/core-services/nova-placement/
 ---
 
 # Nova: Compute Orchestration & Placement API
@@ -63,6 +64,6 @@ reserved_host_memory_mb = 1024
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/keystone' | relative_url }}">&larr; Keystone (Identity)</a>
-  <a class="page-nav-btn" href="{{ '/neutron-ovn' | relative_url }}">Next: Neutron & OVN &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/keystone/' | relative_url }}">&larr; Keystone (Identity)</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/neutron-ovn/' | relative_url }}">Next: Neutron & OVN &rarr;</a>
 </div>

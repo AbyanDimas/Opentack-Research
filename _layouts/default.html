@@ -46,26 +46,27 @@
           <li><a class="buttons github" href="{{ site.github.repository_url | default: 'https://github.com/AbyanDimas/Opentack-Research' }}">View On GitHub</a></li>
         </ul>
 
-        <!-- Sidebar Navigation (Clean, integrated into Dinky header) -->
+        <!-- Sidebar Navigation (Categorized folder structure) -->
         <nav class="dinky-nav">
           <div class="dinky-nav-group">
             <div class="dinky-nav-heading">Overview</div>
             <a href="{{ '/' | relative_url }}" class="dinky-nav-link {% if page.url == '/' or page.url == '/index.html' %}active{% endif %}">Introduction</a>
-            <a href="{{ '/architecture' | relative_url }}" class="dinky-nav-link {% if page.url contains 'architecture' %}active{% endif %}">Architecture & Topology</a>
-            <a href="{{ '/prerequisites' | relative_url }}" class="dinky-nav-link {% if page.url contains 'prerequisites' %}active{% endif %}">Environment & Setup</a>
+            <a href="{{ '/docs/overview/architecture/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/overview/architecture' %}active{% endif %}">Architecture & Topology</a>
+            <a href="{{ '/docs/overview/environment-setup/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/overview/environment-setup' %}active{% endif %}">Environment & Setup</a>
+            <a href="{{ '/docs/overview/devstack-lab-notes/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/overview/devstack-lab-notes' %}active{% endif %}">DevStack Lab Notes</a>
           </div>
 
           <div class="dinky-nav-group">
             <div class="dinky-nav-heading">Core Services</div>
-            <a href="{{ '/keystone' | relative_url }}" class="dinky-nav-link {% if page.url contains 'keystone' %}active{% endif %}">Keystone (Identity)</a>
-            <a href="{{ '/nova-placement' | relative_url }}" class="dinky-nav-link {% if page.url contains 'nova-placement' %}active{% endif %}">Nova & Placement (Compute)</a>
-            <a href="{{ '/neutron-ovn' | relative_url }}" class="dinky-nav-link {% if page.url contains 'neutron-ovn' %}active{% endif %}">Neutron & OVN (Networking)</a>
-            <a href="{{ '/storage-glance-cinder' | relative_url }}" class="dinky-nav-link {% if page.url contains 'storage' %}active{% endif %}">Glance & Cinder (Storage)</a>
+            <a href="{{ '/docs/core-services/keystone/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/core-services/keystone' %}active{% endif %}">Keystone (Identity)</a>
+            <a href="{{ '/docs/core-services/nova-placement/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/core-services/nova-placement' %}active{% endif %}">Nova & Placement (Compute)</a>
+            <a href="{{ '/docs/core-services/neutron-ovn/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/core-services/neutron-ovn' %}active{% endif %}">Neutron & OVN (Networking)</a>
+            <a href="{{ '/docs/core-services/storage/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/core-services/storage' %}active{% endif %}">Glance & Cinder (Storage)</a>
           </div>
 
           <div class="dinky-nav-group">
             <div class="dinky-nav-heading">Operations</div>
-            <a href="{{ '/troubleshooting' | relative_url }}" class="dinky-nav-link {% if page.url contains 'troubleshooting' %}active{% endif %}">Troubleshooting & Diagnostics</a>
+            <a href="{{ '/docs/operations/troubleshooting/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/operations/troubleshooting' %}active{% endif %}">Troubleshooting & Diagnostics</a>
           </div>
         </nav>
       </header>

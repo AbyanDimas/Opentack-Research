@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Architecture & Topology - OpenStack Research Documentation
+permalink: /docs/overview/architecture/
 ---
 
 # OpenStack DevStack Architecture & Lab Topology
@@ -76,5 +77,5 @@ Standard OpenStack topologies require dedicated physical network interfaces for 
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/' | relative_url }}">&larr; Introduction</a>
-  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">Next: Environment & Setup &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/overview/environment-setup/' | relative_url }}">Next: Environment & Setup &rarr;</a>
 </div>

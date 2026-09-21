@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Troubleshooting - OpenStack Research Documentation
+permalink: /docs/operations/troubleshooting/
 ---
 
 # Troubleshooting and Diagnostic Guide
@@ -103,6 +104,6 @@ systemctl --user restart devstack@n-cpu.service
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/storage-glance-cinder' | relative_url }}">&larr; Glance & Cinder</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/storage/' | relative_url }}">&larr; Glance & Cinder</a>
   <a class="page-nav-btn" href="{{ '/' | relative_url }}">Return to Overview &rarr;</a>
 </div>

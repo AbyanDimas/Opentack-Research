@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Keystone (Identity) - OpenStack Research Documentation
+permalink: /docs/core-services/keystone/
 ---
 
 # Keystone: Identity Service Architecture
@@ -58,6 +59,6 @@ To prevent token expiry during long-running tasks, **Service Tokens** (`X-Servic
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">&larr; Environment & Setup</a>
-  <a class="page-nav-btn" href="{{ '/nova-placement' | relative_url }}">Next: Nova & Placement &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/overview/environment-setup/' | relative_url }}">&larr; Environment & Setup</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/nova-placement/' | relative_url }}">Next: Nova & Placement &rarr;</a>
 </div>

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Environment & Setup - OpenStack Research Documentation
+permalink: /docs/overview/environment-setup/
 ---
 
 # Prerequisites and Environment Setup
@@ -123,6 +124,6 @@ openstack compute service list
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/architecture' | relative_url }}">&larr; Architecture & Topology</a>
-  <a class="page-nav-btn" href="{{ '/keystone' | relative_url }}">Next: Keystone (Identity) &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/overview/architecture/' | relative_url }}">&larr; Architecture & Topology</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/keystone/' | relative_url }}">Next: Keystone (Identity) &rarr;</a>
 </div>

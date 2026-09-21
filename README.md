@@ -8,21 +8,29 @@ Technical research and architectural notes on **OpenStack** deployment and opera
 
 ---
 
-## Documentation Index
+## Directory Structure & Categorization
 
-- [Introduction](./index.md)
-- [Architecture & Topology](./architecture.md)
-- [Environment & Setup](./prerequisites.md)
-- [Keystone: Identity Architecture](./keystone.md)
-- [Nova & Placement: Compute Orchestration](./nova-placement.md)
-- [Neutron & OVN: Software-Defined Networking](./neutron-ovn.md)
-- [Glance & Cinder: Storage Architecture](./storage-glance-cinder.md)
-- [Troubleshooting & Diagnostics](./troubleshooting.md)
+The documentation is organized in `docs/` by domain:
+
+```
+docs/
+├── overview/
+│   ├── architecture.md           # Topology and multi-node role split
+│   ├── environment-setup.md      # Host preparation and local.conf
+│   └── devstack-lab-notes.md     # Real-world lessons from constrained hardware
+├── core-services/
+│   ├── keystone.md               # Identity service and Fernet tokens
+│   ├── nova-placement.md         # Compute orchestration and Placement API
+│   ├── neutron-ovn.md            # Software-defined networking with OVN
+│   └── storage.md                # Glance image registry and Cinder block storage
+└── operations/
+    └── troubleshooting.md        # OOM prevention, AMQP tuning, OVN DB sync
+```
 
 ---
 
 ## CI/CD Pipeline & GitHub Pages Configuration
 
-- **Jekyll Custom Engine:** Responsive documentation shell with client-side interactive search and dark sidebar.
+- **Theme Engine:** Jekyll Dinky theme with customized sidebar navigation and client-side real-time search.
 - **Automated Workflow:** GitHub Actions (`.github/workflows/deploy-pages.yml`).
-- **Deployment Protection:** Governed by the `github-pages` environment with mandatory review and approval gates.
+- **Deployment Gate:** Governed by the `github-pages` environment with mandatory review and approval gates.

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Glance & Cinder (Storage) - OpenStack Research Documentation
+permalink: /docs/core-services/storage/
 ---
 
 # Storage Services: Glance & Cinder
@@ -71,6 +72,6 @@ openstack server add volume my-instance test-volume-01
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/neutron-ovn' | relative_url }}">&larr; Neutron & OVN</a>
-  <a class="page-nav-btn" href="{{ '/troubleshooting' | relative_url }}">Next: Troubleshooting &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/docs/core-services/neutron-ovn/' | relative_url }}">&larr; Neutron & OVN</a>
+  <a class="page-nav-btn" href="{{ '/docs/operations/troubleshooting/' | relative_url }}">Next: Troubleshooting &rarr;</a>
 </div>
