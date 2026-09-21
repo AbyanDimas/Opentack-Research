@@ -1,0 +1,30 @@
+name: Documentation Quality & Typo Check
+
+on:
+  push:
+    branches:
+      - pages
+      - main
+  pull_request:
+    branches:
+      - pages
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  spelling:
+    name: Check Spelling & Typos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Codespell
+        uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          check_hidden: false
+          ignore_words_file: .codespellignore
+          skip: "*.png,*.jpg,*.svg,*.min.js,*.lock"
