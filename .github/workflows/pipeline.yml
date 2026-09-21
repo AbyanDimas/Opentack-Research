@@ -1,0 +1,91 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - pages
+  pull_request:
+    branches:
+      - pages
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Check Spelling & Typos
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Codespell
+        uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          check_hidden: false
+          ignore_words_file: .codespellignore
+          skip: "*.png,*.jpg,*.svg,*.min.js,*.lock,.git"
+
+  build:
+    name: Build Jekyll Wiki
+    needs: [lint]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Upload Pages Artifact
+        if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+
+  release:
+    name: Release Please
+    needs: [lint]
+    if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Run Release Please
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: simple
+          target-branch: pages
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: [build, release]
+    if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "pages-deploy"
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Site
+        id: deployment
+        uses: actions/deploy-pages@v4
