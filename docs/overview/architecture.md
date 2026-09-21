@@ -14,8 +14,12 @@ This document provides a detailed breakdown of the multi-node **DevStack** lab e
 
 Most OpenStack deployment guides assume servers with at least 16GB–32GB RAM per node. Operating a multi-node cluster under strict resource limits (4GB per VM) forces an explicit understanding of each daemon's resource consumption and interaction patterns.
 
-> **Operational Insight:**  
+> [!NOTE]
+> **Operational Insight:**
 > The architectural difference between executing `openstack server list` and understanding why Nova Conductor dispatches an RPC message via RabbitMQ before querying MySQL represents the core mechanism of OpenStack orchestration.
+
+> [!IMPORTANT]
+> Because each VM has only 4GB RAM, memory overcommit and swap management must be configured correctly to prevent `systemd-oomd` from terminating `mysqld` or `beam.smp` (RabbitMQ).
 
 ---
 

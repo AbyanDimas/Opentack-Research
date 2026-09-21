@@ -223,6 +223,115 @@ p.header {
   background-color: #fdfdfd;
 }
 
+/* Code Block Copy Button */
+.code-block-wrapper {
+  position: relative !important;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #252525;
+  color: #c0c0c0;
+  border: 1px solid #444444;
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+  z-index: 20;
+}
+
+.code-block-wrapper:hover .code-copy-btn,
+.code-copy-btn:focus {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: #af0011;
+  color: #ffffff;
+  border-color: #af0011;
+}
+
+.code-copy-btn.copied {
+  background: #1b5e20;
+  color: #ffffff;
+  border-color: #1b5e20;
+}
+
+/* Callout / Alert Blocks (GitHub style Markdown alerts) */
+blockquote.callout {
+  margin: 18px 0 !important;
+  padding: 12px 16px !important;
+  border-left: 4px solid #777777 !important;
+  border-radius: 0 4px 4px 0;
+  background: #f8f9fa;
+  color: #24292f;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+blockquote.callout p {
+  margin: 0 !important;
+}
+
+.callout-title {
+  display: block;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.callout-body {
+  display: block;
+}
+
+blockquote.callout-note {
+  border-left-color: #0969da !important;
+  background: #f0f7ff;
+}
+blockquote.callout-note .callout-title { color: #0969da; }
+
+blockquote.callout-tip {
+  border-left-color: #1a7f37 !important;
+  background: #f0fff4;
+}
+blockquote.callout-tip .callout-title { color: #1a7f37; }
+
+blockquote.callout-important {
+  border-left-color: #8250df !important;
+  background: #fbf7ff;
+}
+blockquote.callout-important .callout-title { color: #8250df; }
+
+blockquote.callout-warning {
+  border-left-color: #d97706 !important;
+  background: #fffbeb;
+}
+blockquote.callout-warning .callout-title { color: #b45309; }
+
+blockquote.callout-caution {
+  border-left-color: #af0011 !important;
+  background: #fff1f2;
+}
+blockquote.callout-caution .callout-title { color: #af0011; }
+
+/* Mermaid Diagrams Container */
+.mermaid {
+  text-align: center;
+  margin: 24px 0;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
 /* Responsive adjustments */
 @media print, screen and (max-width: 960px) {
   header {

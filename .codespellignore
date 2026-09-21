@@ -9,3 +9,9 @@ glance
 cinder
 keystone
 novnc
+kolla
+multinode
+galera
+vrrp
+distro
+haproxy

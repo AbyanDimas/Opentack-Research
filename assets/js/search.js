@@ -68,6 +68,20 @@
       category: "Operations",
       description: "Solving OOM kills on MySQL and RabbitMQ, AMQP heartbeat tuning, OVN DB synchronization, systemd service management.",
       keywords: "troubleshooting diagnostic oom killer mysqld memory out of memory rabbitmq heartbeat timeout ovn db sync systemd journalctl"
+    },
+    {
+      title: "Kolla-Ansible (Multi-Node)",
+      url: baseUrl + "/docs/operations/kolla-ansible/",
+      category: "Operations",
+      description: "Containerized OpenStack deployment with Docker/Podman microservices, HAProxy Keepalived VIP, and Ansible automation.",
+      keywords: "kolla ansible multinode containerized docker podman haproxy keepalived vip globals.yml inventory deployment production"
+    },
+    {
+      title: "Lab Automation Assets",
+      url: baseUrl + "/labs/",
+      category: "Labs & Automation",
+      description: "Ready-to-use DevStack bootstrap scripts, low-memory local.conf recipes, and operational configs.",
+      keywords: "labs devstack scripts automation bootstrap local.conf shell bash config templates recipes"
     }
   ];
 

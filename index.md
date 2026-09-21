@@ -23,6 +23,8 @@ The research documentation is structured into modular sections covering system a
 | **Core Services** | [Neutron & OVN](./docs/core-services/neutron-ovn/) | Modern OVN software-defined networking, Geneve encapsulation, distributed routing, and single-NIC bridge topology. |
 | **Core Services** | [Glance & Cinder Storage](./docs/core-services/storage/) | Disk image formats (RAW vs QCOW2), block storage lifecycle, and LVM loopback driver implementation. |
 | **Operations** | [Troubleshooting & Diagnostics](./docs/operations/troubleshooting/) | Out-Of-Memory prevention, AMQP heartbeat tuning, systemd user service management, and OVN database synchronization. |
+| **Operations** | [Kolla-Ansible (Multi-Node)](./docs/operations/kolla-ansible/) | Containerized microservices deployment with Docker/Podman, HAProxy VIP, and Ansible automation. |
+| **Labs & Automation** | [Lab Automation Assets](./labs/) | Ready-to-use DevStack bootstrap scripts, low-memory local.conf recipes, and operational configs. |
 
 ---
 

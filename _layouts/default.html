@@ -13,14 +13,19 @@
     <![endif]-->
     <script type="module">
       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-      mermaid.initialize({ startOnLoad: true, theme: 'default' });
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('pre code.language-mermaid').forEach(el => {
+      mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+      document.addEventListener('DOMContentLoaded', async () => {
+        const blocks = document.querySelectorAll('pre code.language-mermaid, div.language-mermaid pre code');
+        for (const el of blocks) {
           const div = document.createElement('div');
           div.className = 'mermaid';
           div.textContent = el.textContent;
-          el.parentElement.replaceWith(div);
-        });
+          const container = el.closest('.language-mermaid') || el.closest('pre');
+          container.replaceWith(div);
+        }
+        if (blocks.length > 0) {
+          await mermaid.run();
+        }
       });
     </script>
   </head>
@@ -67,6 +72,12 @@
           <div class="dinky-nav-group">
             <div class="dinky-nav-heading">Operations</div>
             <a href="{{ '/docs/operations/troubleshooting/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/operations/troubleshooting' %}active{% endif %}">Troubleshooting & Diagnostics</a>
+            <a href="{{ '/docs/operations/kolla-ansible/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/docs/operations/kolla-ansible' %}active{% endif %}">Kolla-Ansible (Multi-Node)</a>
+          </div>
+
+          <div class="dinky-nav-group">
+            <div class="dinky-nav-heading">Labs & Automation</div>
+            <a href="{{ '/labs/' | relative_url }}" class="dinky-nav-link {% if page.url contains '/labs' %}active{% endif %}">Lab Scripts & Configs</a>
           </div>
         </nav>
       </header>
@@ -81,5 +92,68 @@
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     <script src="{{ '/assets/js/search.js' | relative_url }}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        // Copy-to-clipboard on code blocks
+        document.querySelectorAll('div.highlight, pre:not(.mermaid)').forEach(block => {
+          const pre = block.tagName === 'PRE' ? block : block.querySelector('pre');
+          if (!pre || block.classList.contains('mermaid') || pre.classList.contains('mermaid') || pre.closest('.mermaid') || pre.closest('.language-mermaid')) return;
+
+          let wrapper = block;
+          if (block.tagName === 'PRE') {
+            wrapper = document.createElement('div');
+            wrapper.className = 'code-block-wrapper';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+          } else {
+            wrapper.classList.add('code-block-wrapper');
+          }
+
+          if (wrapper.querySelector('.code-copy-btn')) return;
+
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'code-copy-btn';
+          copyBtn.type = 'button';
+          copyBtn.textContent = 'Copy';
+          copyBtn.setAttribute('aria-label', 'Copy code to clipboard');
+
+          copyBtn.addEventListener('click', async () => {
+            const code = pre.querySelector('code') || pre;
+            try {
+              await navigator.clipboard.writeText(code.innerText.trim());
+              copyBtn.textContent = 'Copied!';
+              copyBtn.classList.add('copied');
+              setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.remove('copied');
+              }, 2000);
+            } catch (err) {
+              copyBtn.textContent = 'Failed';
+            }
+          });
+
+          wrapper.appendChild(copyBtn);
+        });
+
+        // GitHub Flavored Markdown alerts / callouts
+        document.querySelectorAll('blockquote').forEach(bq => {
+          const p = bq.querySelector('p');
+          if (!p) return;
+          const match = p.innerHTML.match(/^\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*<br\s*\/?>|\s*\n)?([\s\S]*)$/i);
+          if (match) {
+            const type = match[1].toLowerCase();
+            bq.classList.add('callout', 'callout-' + type);
+            const titleMap = {
+              note: 'Note',
+              tip: 'Tip',
+              important: 'Important',
+              warning: 'Warning',
+              caution: 'Caution'
+            };
+            p.innerHTML = '<span class="callout-title">' + (titleMap[type] || match[1]) + '</span><span class="callout-body">' + match[2] + '</span>';
+          }
+        });
+      });
+    </script>
   </body>
 </html>
