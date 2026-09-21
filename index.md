@@ -1,69 +1,50 @@
-# OpenStack Research Wiki
+---
+layout: default
+title: Beranda - OpenStack Research Wiki
+---
 
-Selamat datang di repositori riset dan dokumentasi **OpenStack**. Repositori ini berisi kumpulan catatan arsitektur, eksperimen homelab, konfigurasi DevStack, serta panduan implementasi cloud privat multi-node.
+# 🚀 OpenStack Research Wiki
+
+Selamat datang di repositori riset dan dokumentasi teknis **OpenStack**. Dokumentasi ini menyajikan eksplorasi mendalam arsitektur komputasi awan *private cloud*, implementasi lab nyata pada lingkungan *constrained hardware* (DevStack 2-Node pada RAM 4GB), serta analisis komponen OpenStack modern (rilis terkini **2025/2026: Epoxy, Flamingo, Gazpacho**).
 
 ---
 
-## 📚 Daftar Isi / Navigasi Dokumen
+## 🧭 Peta Navigasi Dokumentasi
 
-- [**Arsitektur & DevStack Lab Overview**](./OpenStack-DevStack-Overview)
-  - Arsitektur Lab Multi-node (Controller + Compute)
-  - Penjelasan Alur Komunikasi (Nova, Neutron, Keystone, Glance, RabbitMQ, MySQL)
-  - Konfigurasi Single NIC dengan Bridge `br-ex`
+Dokumentasi ini dirancang agar saling terhubung secara runtut dari konsep dasar hingga implementasi:
+
+| Bagian | Dokumen | Penjelasan Utama |
+|---|---|---|
+| **01. Lab Overview** | [**Arsitektur & Lab DevStack**](./architecture) | Topologi multi-node, rasionalisasi pembagian peran, dan RPC data flow. |
+| **02. Setup Guide** | [**Prasyarat & Setup local.conf**](./prerequisites) | Konfigurasi Ubuntu 24.04, swap sizing, `stack` user, dan file `local.conf`. |
+| **03. Identity** | [**Keystone Identity Service**](./keystone) | Fernet tokens, token scoping (system vs project), dan service catalog. |
+| **04. Compute** | [**Nova & Placement API**](./nova-placement) | Instance boot lifecycle, scheduler weighting, dan alokasi resource provider. |
+| **05. Network** | [**Neutron & OVN Architecture**](./neutron-ovn) | Evolusi OVN vs legacy OVS, Geneve overlay, distributed routing, dan single NIC. |
+| **06. Storage** | [**Glance & Cinder Storage**](./storage-glance-cinder) | Image management (RAW vs QCOW2), block volume lifecycle, dan Ceph/LVM backend. |
+| **07. Problem Solving**| [**Troubleshooting & Lab Learnings**](./troubleshooting) | Solusi OOM, RabbitMQ disconnect, debug systemd, dan OVN DB sync. |
 
 ---
 
-## 🏗️ Ringkasan Topologi Lab
+## 🌐 Perkembangan OpenStack Terkini (Rilis 2025–2026)
 
-Topologi eksperimen menggunakan dua node Ubuntu 24.04 LTS dengan alokasi memori minimalis (4GB RAM per node):
+OpenStack terus berevolusi dengan siklus rilis 6 bulan (*SLURP & Non-SLURP*):
 
-| Node | Hostname | IP | Peran (Role) |
-|---|---|---|---|
-| **Node 1** | `ab-lab-research-01` | `192.168.101.142` | Controller & Network Node (Keystone, Nova API, Neutron Server, Glance, MySQL, RabbitMQ) |
-| **Node 2** | `ab-lab-research-02` | `192.168.101.143` | Compute Node (`nova-compute`, libvirt, KVM, Neutron L2 Agent / OVS) |
+- **Epoxy (2025.1) & Flamingo (2025.2):** Standardisasi penuh backend **OVN** menggantikan agen-agen OVS legacy; penguatan isolasi RBAC berbasis *system-scoped tokens*.
+- **Gazpacho (2026.1):** Peningkatan performa Placement API untuk akselerator hardware (GPU/vGPU) dan optimasi footprint memori pada modul control plane.
 
 ```mermaid
-flowchart TB
-    subgraph LAN["LAN 192.168.101.0/24"]
-        direction TB
-    end
-
-    subgraph Node1["Node01 (.142) - Controller & Network Node"]
-        API["Keystone, Nova API,<br/>Neutron server, Glance"]
-        DATA["MySQL & RabbitMQ"]
-        BREX["br-ex shares ens3"]
-    end
-
-    subgraph Node2["Node02 (.143) - Compute Node"]
-        COMPUTE["nova-compute<br/>libvirt & KVM"]
-        AGENT["neutron L2 agent, OVS"]
-    end
-
-    LAN --> Node1
-    LAN --> Node2
-    API <--> DATA
-    DATA <-- "RPC over RabbitMQ & DB queries" --> AGENT
-    DATA <-- "RPC over RabbitMQ & DB queries" --> COMPUTE
+flowchart LR
+    Keystone["🔐 Keystone<br/>(Auth & Token)"] --> Nova["💻 Nova API<br/>(Compute Request)"]
+    Nova --> Placement["📊 Placement<br/>(Resource Filter)"]
+    Placement --> NovaCompute["⚙️ Nova Compute<br/>(Libvirt/KVM)"]
+    Nova --> Neutron["🌐 Neutron / OVN<br/>(Port & IP Wiring)"]
+    Nova --> Glance["🖼️ Glance<br/>(Base Image)"]
+    Nova --> Cinder["💾 Cinder<br/>(Persistent Volume)"]
 ```
 
 ---
 
-## 💡 Pelajaran Utama dari Lab
-
-1. **Resource Headroom & Split Peran:**
-   Menjalankan OpenStack di 4GB RAM memerlukan pemisahan ketat: Node 1 menampung seluruh *control plane*, sementara Node 2 hanya menjalankan *compute agent*.
-2. **Ketiadaan Dedicated NIC:**
-   External network di-share langsung di atas interface fisik yang sama (`ens3`) dengan mengarahkan `br-ex`, `FLOATING_RANGE`, dan `PUBLIC_INTERFACE` ke subnet lokal.
-
----
-
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({ startOnLoad: true, theme: 'default' });
-  document.querySelectorAll('pre code.language-mermaid').forEach(el => {
-    const div = document.createElement('div');
-    div.className = 'mermaid';
-    div.textContent = el.textContent;
-    el.parentElement.replaceWith(div);
-  });
-</script>
+<div class="page-nav-box">
+  <span></span>
+  <a class="page-nav-btn" href="{{ '/architecture' | relative_url }}">Mulai Baca: 🏗️ Arsitektur & Lab &rarr;</a>
+</div>
