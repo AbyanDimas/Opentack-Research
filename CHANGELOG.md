@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/AbyanDimas/Opentack-Research/compare/v1.0.0...v1.1.0) (2026-09-21)
+
+
+### Features
+
+* enhance wiki UX, add Kolla-Ansible guide, lab automation, and CI link checker ([62bde9c](https://github.com/AbyanDimas/Opentack-Research/commit/62bde9cd8902e3200d039c4778f07e9b503dd247))
+
 ## 1.0.0 (2026-09-21)
 
 
