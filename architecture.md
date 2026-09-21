@@ -1,28 +1,28 @@
 ---
 layout: default
-title: Arsitektur & Lab DevStack - OpenStack Research Wiki
+title: Architecture & Topology - OpenStack Research Documentation
 ---
 
-# 🏗️ Arsitektur & Lab DevStack
+# OpenStack DevStack Architecture & Lab Topology
 
-Dokumen ini membedah arsitektur eksperimen **DevStack Multi-Node** yang dibangun di atas perangkat homelab dengan spesifikasi terbatas: **dua mesin virtual (VM) Ubuntu 24.04 LTS masing-masing hanya memiliki 4GB RAM dan 60GB disk**.
-
----
-
-## 🎯 Rasionalisasi dan Latar Belakang
-
-Kebanyakan tutorial OpenStack mengasumsikan ketersediaan server berkapasitas besar (minimal 16GB–32GB RAM per node). Namun, membangun lab pada lingkungan dengan memori terbatas (4GB) justru memaksa pemahaman mendalam terhadap fungsi spesifik setiap subsistem:
-
-> **Pelajaran Inti:**  
-> Selisih antara mengeksekusi perintah `openstack server list` dengan memahami **mengapa Nova Conductor harus berkomunikasi ke RabbitMQ sebelum menyentuh database** adalah esensi penguasaan infrastruktur cloud.
+This document provides a detailed breakdown of the multi-node **DevStack** lab environment built on constrained hardware: **two Ubuntu 24.04 LTS virtual machines, each provisioned with 4GB RAM and 60GB disk space**.
 
 ---
 
-## 🖥️ Topologi Node & Alokasi Peran
+## Lab Constraints and Rationale
 
-Lab disusun menggunakan 2 Node dalam satu subnet LAN fisik:
+Most OpenStack deployment guides assume servers with at least 16GB–32GB RAM per node. Operating a multi-node cluster under strict resource limits (4GB per VM) forces an explicit understanding of each daemon's resource consumption and interaction patterns.
 
-| Node | Hostname | IP Address | Peran (Role) & Layanan Utama |
+> **Operational Insight:**  
+> The architectural difference between executing `openstack server list` and understanding why Nova Conductor dispatches an RPC message via RabbitMQ before querying MySQL represents the core mechanism of OpenStack orchestration.
+
+---
+
+## Node Topology and Role Allocation
+
+The lab is configured across two nodes within the same physical LAN subnet:
+
+| Node | Hostname | IP Address | Assigned Roles and Daemons |
 |---|---|---|---|
 | **Node 1** | `ab-lab-research-01` | `192.168.101.142` | **Controller & Network Node**<br/>Keystone, Nova API, Nova Conductor, Nova Scheduler, Glance, Neutron Server, MySQL, RabbitMQ, OVN Central |
 | **Node 2** | `ab-lab-research-02` | `192.168.101.143` | **Compute Node**<br/>`nova-compute`, libvirt, KVM, OVN Controller (`ovn-controller`) |
@@ -36,7 +36,7 @@ flowchart TB
     subgraph Node1["Node 01 (.142) - Controller & Network"]
         API["Keystone, Nova API, Neutron Server, Glance"]
         DATA["MySQL & RabbitMQ (Message Broker)"]
-        BREX["Bridge br-ex (sharing ens3)"]
+        BREX["Bridge br-ex (shares ens3)"]
     end
 
     subgraph Node2["Node 02 (.143) - Compute Node"]
@@ -47,34 +47,34 @@ flowchart TB
     LAN --> Node1
     LAN --> Node2
     API <--> DATA
-    DATA <-- "AMQP / RPC via RabbitMQ & SQL Connection" --> AGENT
-    DATA <-- "AMQP / RPC via RabbitMQ & SQL Connection" --> COMPUTE
+    DATA <-- "AMQP RPC via RabbitMQ & SQL connection" --> AGENT
+    DATA <-- "AMQP RPC via RabbitMQ & SQL connection" --> COMPUTE
 ```
 
 ---
 
-## ⚡ Karakteristik Aliran Komunikasi
+## Communication and Control Flow
 
-1. **Desentralisasi Eksekusi (Stateless Control):**  
-   Node 2 (`compute`) tidak mengambil keputusan penjadwalan secara mandiri. Keputusan penempatan VM diambil seluruhnya di Node 1 oleh **Nova Scheduler & Placement**. Node 2 hanya mengeksekusi instruksi peluncuran instance via `libvirt` ketika diperintah.
-2. **Tidak Ada Dependensi SSH Antar-Node:**  
-   Seluruh sinkronisasi status dan perintah orkestrasi dikirimkan melalui antrean pesan **RabbitMQ (AMQP)** dan kueri terarah ke **MySQL**, bukan lewat remote shell.
-3. **Pemisahan Peran untuk Kelangsungan Sistem (Survival Split):**  
-   Dengan kapasitas memori hanya 4GB per node, menempatkan API service di kedua node akan memicu *memory exhaustion* (OOM Killer). Node 1 mendedikasikan RAM untuk seluruh *control plane*, sedangkan Node 2 mendedikasikan RAM untuk *hypervisor* dan instance pengguna.
+1. **Stateless Compute Execution:**  
+   Node 2 does not perform independent scheduling or network planning. Scheduling decisions are executed entirely on Node 1 via Nova Scheduler and the Placement API. Node 2 operates as an execution target, provisioning KVM instances through libvirt and wiring virtual interfaces upon instruction.
+2. **Elimination of Inter-Node SSH:**  
+   No SSH connections are used between the controller and compute nodes during instance provisioning. All coordination occurs asynchronously via **RabbitMQ (AMQP)** and direct **MySQL** database connections using service credentials.
+3. **Control Plane Isolation:**  
+   To prevent Out-Of-Memory (OOM) termination on 4GB nodes, all API and database services are strictly consolidated onto Node 1, leaving Node 2 dedicated to hypervisor processes and user instances.
 
 ---
 
-## 🔌 Solusi Single NIC untuk Jaringan Eksternal
+## Single NIC External Network Configuration
 
-Pada instalasi standar, OpenStack memerlukan kartu jaringan terpisah untuk *management network* dan *external provider network*. Karena kedua VM homelab hanya memiliki satu interface fisik (`ens3`), arsitektur disesuaikan dengan:
+Standard OpenStack topologies require dedicated physical network interfaces for management traffic and provider networks. To operate with a single physical NIC (`ens3`), the external Open vSwitch bridge `br-ex` shares the interface:
 
-- Membuat Open vSwitch bridge `br-ex` langsung menumpang di interface `ens3`.
-- Mengalokasikan blok subnet kecil (misalnya `/28`) yang belum digunakan dari LAN fisik lokal untuk dijadikan **Floating IP pool**.
-- Menyetel parameter `PUBLIC_INTERFACE=ens3` dan `FLOATING_RANGE` pada konfigurasi DevStack.
+- The `br-ex` bridge is attached directly to `ens3`.
+- A dedicated `/28` address block from the local LAN subnet is assigned to the OpenStack Floating IP pool.
+- The DevStack configuration sets `PUBLIC_INTERFACE=ens3` and maps `FLOATING_RANGE` directly onto the unused host subnet block.
 
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/' | relative_url }}">&larr; Beranda Wiki</a>
-  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">Lanjut: ⚙️ Prasyarat & local.conf &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/' | relative_url }}">&larr; Introduction</a>
+  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">Next: Environment & Setup &rarr;</a>
 </div>

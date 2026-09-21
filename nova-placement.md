@@ -1,55 +1,54 @@
 ---
 layout: default
-title: Nova & Placement API - OpenStack Research Wiki
+title: Nova & Placement (Compute) - OpenStack Research Documentation
 ---
 
-# 💻 Nova: Compute Service & Placement API
+# Nova: Compute Orchestration & Placement API
 
-Nova bertanggung jawab atas orkestrasi siklus hidup mesin virtual (VM), mulai dari penjadwalan, peluncuran, pengubahan ukuran (*resizing*), hingga terminasi.
+Nova orchestrates the full lifecycle of compute instances, managing scheduling, provisioning, resizing, and teardown across hypervisor nodes.
 
 ---
 
-## 1. Peran Penting Placement API
+## 1. Placement API and Inventory Modeling
 
-Sebelum Placement dipisahkan, Nova Scheduler harus melakukan kueri database yang lambat dan rentan *race condition* untuk melacak kapasitas CPU, RAM, dan disk pada setiap hypervisor.
+The Placement API tracks inventory and allocations for compute resources, preventing race conditions and eliminating the need for Nova Scheduler to poll hypervisors directly.
 
-**Placement API** memisahkan pelacakan inventaris komputasi menjadi model abstrak:
-- **Resource Provider (RP):** Objek fisik atau logis yang menyediakan kapasitas (misalnya: hypervisor node `ab-lab-research-02`).
-- **Inventory:** Jumlah total kapasitas yang dimiliki RP untuk kelas sumber daya tertentu (`VCPU`, `MEMORY_MB`, `DISK_GB`).
-- **Traits:** Karakteristik kualitatif yang dimiliki RP (contoh: arsitektur `HW_CPU_X86_AVX2`, dukungan `CUSTOM_NVME`).
-- **Allocations:** Sumber daya yang telah direservasi dan terpakai oleh sebuah instance.
+Core Placement abstractions:
+- **Resource Provider (RP):** An entity that provides compute or storage capacity (e.g., hypervisor host `ab-lab-research-02`).
+- **Inventory:** Quantitative capacity of an RP for specific classes (`VCPU`, `MEMORY_MB`, `DISK_GB`).
+- **Traits:** Qualitative capabilities associated with an RP (e.g., `HW_CPU_X86_AVX2`, `CUSTOM_NVME`).
+- **Allocations:** Reserved and consumed resources attributed to active instances.
 
 ```mermaid
 flowchart LR
-    NovaScheduler["Nova Scheduler"] -->|Kueri Kandidat Node| Placement["Placement API"]
-    Placement -->|Inventaris & Alokasi| DB[(Placement DB)]
-    NovaScheduler -->|Klaim Alokasi Resource| Placement
-    NovaScheduler -->|Perintah Bangun Instance| NovaCompute["Nova Compute (Node 02)"]
+    NovaScheduler["Nova Scheduler"] -->|Query Eligible Hosts| Placement["Placement API"]
+    Placement -->|Inventories & Allocations| DB[(Placement DB)]
+    NovaScheduler -->|Claim Host Resources| Placement
+    NovaScheduler -->|Build Request via AMQP| NovaCompute["Nova Compute (Node 02)"]
 ```
 
 ---
 
-## 2. Alur Peluncuran Instance (*Instance Boot Flow*)
+## 2. Instance Boot Lifecycle
 
-Saat pengguna mengeksekusi `openstack server create`, alur komunikasi terjadi sebagai berikut:
+When an operator executes `openstack server create`, the following coordination sequence takes place:
 
-1. **Nova API:** Menerima permintaan, memvalidasi kuota dan skema data, mengonversi nama flavor/image menjadi UUID.
-2. **Nova Conductor:** Bertindak sebagai jembatan orkestrasi independen dan database proxy agar `nova-compute` tidak perlu mengakses database utama secara langsung.
+1. **Nova API:** Authenticates the request via Keystone, validates quota and parameters, and creates a database record in state `BUILDING`.
+2. **Nova Conductor:** Orchestrates scheduling requests without exposing compute hosts directly to the primary database.
 3. **Nova Scheduler & Placement:**
-   - Scheduler meminta daftar Resource Provider yang memenuhi syarat minimal flavor ke Placement API.
-   - Placement memfilter node yang memiliki sisa `VCPU` dan `MEMORY_MB` yang cukup.
-   - Scheduler melakukan pembobotan (*weighing*) untuk memilih node terbaik.
-4. **RabbitMQ RPC:** Nova Conductor mengirimkan pesan RPC ke antrean `nova-compute` di Node target (Node 2).
-5. **Neutron & Glance Interaction:**
-   - `nova-compute` meminta Neutron mengalokasikan virtual port dan IP address.
-   - `nova-compute` mengunduh image dari Glance ke direktori *instance cache* (`/opt/stack/data/nova/instances/_base`).
-6. **Hypervisor Driver (libvirt / KVM):** Mengompilasi XML domain libvirt dan meluncurkan VM menggunakan KVM/QEMU.
+   - Queries Placement for Resource Providers satisfying minimum flavor requirements.
+   - Evaluates eligible hosts using configurable weighers (e.g., RAM weigher, CPU weigher).
+4. **RabbitMQ RPC:** Nova Conductor dispatches an AMQP cast message to `nova-compute` on the selected host (Node 2).
+5. **Neutron & Glance Integration:**
+   - `nova-compute` requests virtual port and IP allocation from Neutron.
+   - `nova-compute` pulls the base disk image from Glance into the host base cache (`/opt/stack/data/nova/instances/_base`).
+6. **Libvirt Driver:** Generates libvirt domain XML and launches the KVM process.
 
 ---
 
-## 3. Homelab Tuning untuk Node 4GB
+## 3. Memory Allocation Tuning for 4GB Homelab
 
-Pada homelab dengan RAM terbatas, overcommit ratio pada `nova.conf` perlu diperhatikan:
+On nodes with limited physical memory, overcommit parameters in `nova.conf` must be constrained to prevent kernel OOM intervention:
 
 ```ini
 [DEFAULT]
@@ -58,12 +57,12 @@ ram_allocation_ratio = 1.0
 reserved_host_memory_mb = 1024
 ```
 
-> **Catatan Operasional:**  
-> `ram_allocation_ratio` disetel ke `1.0` (tanpa overcommit) untuk mencegah Linux OOM Killer mematikan proses KVM atau MySQL saat instance pengguna aktif.
+> **Operational Standard:**  
+> Maintaining `ram_allocation_ratio = 1.0` prevents virtual machine processes from over-allocating physical memory, guaranteeing sufficient buffer space for system daemons and Open vSwitch flows.
 
 ---
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/keystone' | relative_url }}">&larr; Keystone (Identity)</a>
-  <a class="page-nav-btn" href="{{ '/neutron-ovn' | relative_url }}">Lanjut: 🌐 Neutron & OVN &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/neutron-ovn' | relative_url }}">Next: Neutron & OVN &rarr;</a>
 </div>

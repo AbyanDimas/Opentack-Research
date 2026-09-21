@@ -1,50 +1,50 @@
 ---
 layout: default
-title: Beranda - OpenStack Research Wiki
+title: Introduction - OpenStack Research Documentation
 ---
 
-# 🚀 OpenStack Research Wiki
+# OpenStack Research Documentation
 
-Selamat datang di repositori riset dan dokumentasi teknis **OpenStack**. Dokumentasi ini menyajikan eksplorasi mendalam arsitektur komputasi awan *private cloud*, implementasi lab nyata pada lingkungan *constrained hardware* (DevStack 2-Node pada RAM 4GB), serta analisis komponen OpenStack modern (rilis terkini **2025/2026: Epoxy, Flamingo, Gazpacho**).
+This repository provides technical research and operational documentation for **OpenStack**, focused on private cloud architecture, multi-node lab implementation under strict hardware constraints (DevStack on dual 4GB RAM virtual machines), and modern OpenStack subsystems (covering releases **2025.1 Epoxy, 2025.2 Flamingo, and 2026.1 Gazpacho**).
 
 ---
 
-## 🧭 Peta Navigasi Dokumentasi
+## Documentation Index
 
-Dokumentasi ini dirancang agar saling terhubung secara runtut dari konsep dasar hingga implementasi:
+The research documentation is structured into modular sections covering system architecture, deployment, core cloud services, and operational troubleshooting:
 
-| Bagian | Dokumen | Penjelasan Utama |
+| Module | Document | Core Scope |
 |---|---|---|
-| **01. Lab Overview** | [**Arsitektur & Lab DevStack**](./architecture) | Topologi multi-node, rasionalisasi pembagian peran, dan RPC data flow. |
-| **02. Setup Guide** | [**Prasyarat & Setup local.conf**](./prerequisites) | Konfigurasi Ubuntu 24.04, swap sizing, `stack` user, dan file `local.conf`. |
-| **03. Identity** | [**Keystone Identity Service**](./keystone) | Fernet tokens, token scoping (system vs project), dan service catalog. |
-| **04. Compute** | [**Nova & Placement API**](./nova-placement) | Instance boot lifecycle, scheduler weighting, dan alokasi resource provider. |
-| **05. Network** | [**Neutron & OVN Architecture**](./neutron-ovn) | Evolusi OVN vs legacy OVS, Geneve overlay, distributed routing, dan single NIC. |
-| **06. Storage** | [**Glance & Cinder Storage**](./storage-glance-cinder) | Image management (RAW vs QCOW2), block volume lifecycle, dan Ceph/LVM backend. |
-| **07. Problem Solving**| [**Troubleshooting & Lab Learnings**](./troubleshooting) | Solusi OOM, RabbitMQ disconnect, debug systemd, dan OVN DB sync. |
+| **01. Overview** | [Architecture & Topology](./architecture) | Multi-node topology, control-plane vs compute role split, and AMQP/SQL RPC communication flow. |
+| **02. Setup** | [Environment & Setup](./prerequisites) | Ubuntu 24.04 LTS preparation, 8GB swap sizing, stack user permissions, and dual `local.conf` specifications. |
+| **03. Identity** | [Keystone Architecture](./keystone) | Fernet token format, key rotation, system-scoped vs project-scoped RBAC, and service tokens. |
+| **04. Compute** | [Nova & Placement API](./nova-placement) | Instance boot workflow, scheduler filter and weigh algorithms, and Placement resource provider modeling. |
+| **05. Network** | [Neutron & OVN](./neutron-ovn) | Modern OVN software-defined networking, Geneve encapsulation, distributed routing, and single-NIC bridge topology. |
+| **06. Storage** | [Glance & Cinder Storage](./storage-glance-cinder) | Disk image formats (RAW vs QCOW2), block storage lifecycle, and LVM loopback driver implementation. |
+| **07. Operations** | [Troubleshooting & Diagnostics](./troubleshooting) | Out-Of-Memory prevention, AMQP heartbeat tuning, systemd user service management, and OVN database synchronization. |
 
 ---
 
-## 🌐 Perkembangan OpenStack Terkini (Rilis 2025–2026)
+## Recent OpenStack Releases (2025–2026)
 
-OpenStack terus berevolusi dengan siklus rilis 6 bulan (*SLURP & Non-SLURP*):
+OpenStack maintains a six-month release cadence consisting of SLURP (Support Long Term Upgrade Release Process) and non-SLURP cycles:
 
-- **Epoxy (2025.1) & Flamingo (2025.2):** Standardisasi penuh backend **OVN** menggantikan agen-agen OVS legacy; penguatan isolasi RBAC berbasis *system-scoped tokens*.
-- **Gazpacho (2026.1):** Peningkatan performa Placement API untuk akselerator hardware (GPU/vGPU) dan optimasi footprint memori pada modul control plane.
+- **Epoxy (2025.1) & Flamingo (2025.2):** Full standardization of OVN as the default networking mechanism; enhanced system-scoped token enforcement for administrative APIs.
+- **Gazpacho (2026.1):** Optimized Placement API query latency for specialized hardware traits and reduced idle memory footprint across Python control-plane daemons.
 
 ```mermaid
 flowchart LR
-    Keystone["🔐 Keystone<br/>(Auth & Token)"] --> Nova["💻 Nova API<br/>(Compute Request)"]
-    Nova --> Placement["📊 Placement<br/>(Resource Filter)"]
-    Placement --> NovaCompute["⚙️ Nova Compute<br/>(Libvirt/KVM)"]
-    Nova --> Neutron["🌐 Neutron / OVN<br/>(Port & IP Wiring)"]
-    Nova --> Glance["🖼️ Glance<br/>(Base Image)"]
-    Nova --> Cinder["💾 Cinder<br/>(Persistent Volume)"]
+    Keystone["Keystone<br/>Identity & Auth"] --> Nova["Nova API<br/>Compute Request"]
+    Nova --> Placement["Placement API<br/>Resource Allocation"]
+    Placement --> NovaCompute["Nova Compute<br/>Libvirt / KVM"]
+    Nova --> Neutron["Neutron / OVN<br/>Network & Ports"]
+    Nova --> Glance["Glance<br/>Image Registry"]
+    Nova --> Cinder["Cinder<br/>Block Storage"]
 ```
 
 ---
 
 <div class="page-nav-box">
   <span></span>
-  <a class="page-nav-btn" href="{{ '/architecture' | relative_url }}">Mulai Baca: 🏗️ Arsitektur & Lab &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/architecture' | relative_url }}">Next: Architecture & Topology &rarr;</a>
 </div>

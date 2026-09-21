@@ -1,20 +1,28 @@
-# Opentack-Research
+# OpenStack Research Documentation
 
 [![Deploy OpenStack Wiki to GitHub Pages](https://github.com/AbyanDimas/Opentack-Research/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/AbyanDimas/Opentack-Research/actions/workflows/deploy-pages.yml)
 
-Kumpulan dokumentasi, riset, dan eksperimen arsitektur seputar **OpenStack** (DevStack Multi-Node Lab).
+Technical research and architectural notes on **OpenStack** deployment and operational workflows (DevStack Multi-Node Lab).
 
-🌐 **Situs Wiki Resmi:** [https://abyandimas.github.io/Opentack-Research/](https://abyandimas.github.io/Opentack-Research/)
+**Official Documentation Site:** [https://abyandimas.github.io/Opentack-Research/](https://abyandimas.github.io/Opentack-Research/)
 
 ---
 
-## 📖 Konten Riset
+## Documentation Index
 
-- [OpenStack DevStack Lab: Overview and Architecture](./OpenStack-DevStack-Overview.md)
-- [Struktur & Beranda Wiki](./index.md)
+- [Introduction](./index.md)
+- [Architecture & Topology](./architecture.md)
+- [Environment & Setup](./prerequisites.md)
+- [Keystone: Identity Architecture](./keystone.md)
+- [Nova & Placement: Compute Orchestration](./nova-placement.md)
+- [Neutron & OVN: Software-Defined Networking](./neutron-ovn.md)
+- [Glance & Cinder: Storage Architecture](./storage-glance-cinder.md)
+- [Troubleshooting & Diagnostics](./troubleshooting.md)
 
-## ⚙️ Konfigurasi GitHub Pages & CI/CD
+---
 
-- **Framework / Theme:** Jekyll (**Dinky** theme via `_config.yml`)
-- **CI/CD Pipeline:** GitHub Actions (`.github/workflows/deploy-pages.yml`)
-- **Deployment Gate:** Menggunakan GitHub Environment `github-pages` dengan proteksi review manual (memerlukan persetujuan / approve dari pemilik repo sebelum proses deploy dipublikasikan).
+## CI/CD Pipeline & GitHub Pages Configuration
+
+- **Jekyll Custom Engine:** Responsive documentation shell with client-side interactive search and dark sidebar.
+- **Automated Workflow:** GitHub Actions (`.github/workflows/deploy-pages.yml`).
+- **Deployment Protection:** Governed by the `github-pages` environment with mandatory review and approval gates.

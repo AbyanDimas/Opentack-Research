@@ -1,65 +1,63 @@
 ---
 layout: default
-title: Keystone (Identity Service) - OpenStack Research Wiki
+title: Keystone (Identity) - OpenStack Research Documentation
 ---
 
-# 🔐 Keystone: OpenStack Identity Service
+# Keystone: Identity Service Architecture
 
-Keystone adalah gerbang autentikasi dan otorisasi sentral bagi seluruh ekosistem OpenStack. Tanpa Keystone, tidak ada layanan lain (Nova, Neutron, Glance, Cinder) yang dapat memverifikasi identitas pengguna maupun saling berkomunikasi secara terpercaya.
+Keystone provides centralized authentication, authorization, and service discovery across the OpenStack cloud ecosystem. Every interaction with Nova, Neutron, Glance, and Cinder requires validation through Keystone.
 
 ---
 
-## 1. Arsitektur Fernet Tokens
+## 1. Fernet Token Architecture
 
-Pada era awal OpenStack, token UUID dan PKI digunakan namun menimbulkan masalah skalabilitas (UUID membutuhkan validasi database terus-menerus, sedangkan PKI menghasilkan token raksasa yang melampaui limit header HTTP).
+Legacy UUID and PKI token implementations introduced performance bottlenecks (UUID tokens required continuous database lookups; PKI tokens exceeded HTTP header limits). Modern OpenStack implementations rely on **Fernet Tokens**:
 
-OpenStack modern menggunakan **Fernet Tokens**:
-- **Karakteristik:** Token berukuran kecil (~255 karakter), terenkripsi simetris (AES-128-CBC) dan diautentikasi dengan HMAC-SHA256.
-- **Tanpa Persistensi Database:** Keystone tidak perlu menyimpan setiap token yang aktif di tabel MySQL. Validasi token dilakukan secara komputasi matematika menggunakan kunci simetris (*Fernet keys*).
-- **Rotasi Kunci:** Kunci disimpan di `/etc/keystone/fernet-keys/`. Kunci diputar secara periodik via `keystone-manage fernet_rotate`.
+- **Characteristics:** Compact (~255 characters), symmetric AES-128-CBC encryption, authenticated with HMAC-SHA256.
+- **Stateless Validation:** Keystone does not store active tokens in the MySQL database. Verification is computed cryptographically using symmetric keys located at `/etc/keystone/fernet-keys/`.
+- **Key Rotation:** Tokens are rotated periodically using `keystone-manage fernet_rotate`.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Pengguna / CLI
+    actor User as User / CLI Client
     participant KS as Keystone API
     participant Nova as Nova API
     
-    User->>KS: POST /v3/auth/tokens (Kredensial)
-    KS-->>User: HTTP 201 (Mengembalikan X-Subject-Token Fernet)
+    User->>KS: POST /v3/auth/tokens (User Credentials)
+    KS-->>User: HTTP 201 (Returns Fernet X-Subject-Token)
     User->>Nova: GET /v2.1/servers (Header: X-Auth-Token)
-    Nova->>KS: Validasi Token & Hak Akses
-    KS-->>Nova: Token Valid + Daftar Role & Project ID
-    Nova-->>User: Daftar Server (HTTP 200)
+    Nova->>KS: Token Validation & Policy Check
+    KS-->>Nova: Token Valid, Roles & Project Scopes
+    Nova-->>User: Server List (HTTP 200)
 ```
 
 ---
 
-## 2. Model Otorisasi RBAC Modern (Scoping)
+## 2. RBAC Policy Scoping (System vs. Project)
 
-Mulai rilis OpenStack kontemporer (2024–2026), model kebijakan disempurnakan dengan pemisahan lingkup token (*token scope*):
+Modern OpenStack releases enforce strict boundary scoping to prevent privilege escalation:
 
-| Jenis Scope | Tujuan | Contoh Operasi |
+| Token Scope | Target Boundary | Example Capabilities |
 |---|---|---|
-| **System-Scoped** | Mengatur resource level infrastruktur fisik global. | Menambah hypervisor, memeriksa log antrean, mengelola physical network. |
-| **Domain-Scoped** | Delegasi administratif pada tingkat tenant/organisasi induk. | Mengelola user, group, dan alokasi kuota project dalam satu domain. |
-| **Project-Scoped** | Operasi sehari-hari di tingkat project / virtual tenant. | Meluncurkan VM, membuat port jaringan internal, membuat snapshot volume. |
+| **System-Scoped** | Global physical infrastructure management. | Hypervisor management, global network provider binding, control-plane log inspection. |
+| **Domain-Scoped** | Administrative boundaries for tenants/organizations. | User lifecycle, group membership, project quota allocations. |
+| **Project-Scoped** | Tenant/project resource boundaries. | Instance creation, virtual port attachment, security group updates. |
 
 ---
 
-## 3. Service Catalog & Service Tokens
+## 3. Service Catalog and Service Tokens
 
-Keystone menyediakan **Service Catalog** yang berfungsi sebagai buku alamat dinamis untuk menemukan endpoint REST API layanan:
-- **Public Endpoint:** Dapat diakses oleh pengguna luar (biasanya via load balancer atau domain publik).
-- **Internal Endpoint:** Jalur komunikasi cepat dan privat antar-layanan di subnet manajemen.
-- **Admin Endpoint:** Digunakan khusus untuk operasi sensitif.
+The Keystone **Service Catalog** functions as a dynamic directory of REST API endpoints:
+- **Public Endpoint:** Externally accessible by client tools and end users.
+- **Internal Endpoint:** Used for high-speed inter-service communication within the management subnet.
+- **Admin Endpoint:** Dedicated to privileged administrative workflows.
 
-Untuk mencegah serangan manipulasi token kedaluwarsa saat transaksi berdurasi panjang, OpenStack mengimplementasikan **Service Tokens**:
-Layanan (seperti Nova) menyertakan identitas layanannya sendiri (`X-Service-Token`) di samping token pengguna (`X-Auth-Token`) saat memanggil Glance atau Neutron.
+To prevent token expiry during long-running tasks, **Service Tokens** (`X-Service-Token`) are passed alongside user tokens (`X-Auth-Token`) when Nova communicates downstream with Glance or Neutron.
 
 ---
 
 <div class="page-nav-box">
-  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">&larr; Setup & local.conf</a>
-  <a class="page-nav-btn" href="{{ '/nova-placement' | relative_url }}">Lanjut: 💻 Nova & Placement &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/prerequisites' | relative_url }}">&larr; Environment & Setup</a>
+  <a class="page-nav-btn" href="{{ '/nova-placement' | relative_url }}">Next: Nova & Placement &rarr;</a>
 </div>

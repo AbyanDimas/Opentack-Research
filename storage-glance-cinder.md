@@ -1,30 +1,30 @@
 ---
 layout: default
-title: Glance & Cinder (Storage) - OpenStack Research Wiki
+title: Glance & Cinder (Storage) - OpenStack Research Documentation
 ---
 
-# 💾 Storage: Glance (Images) & Cinder (Block Storage)
+# Storage Services: Glance & Cinder
 
-Penyimpanan di OpenStack terbagi ke dalam dua domain utama: **Glance** untuk repositori cetak biru sistem operasi (*disk images*) dan **Cinder** untuk media penyimpanan blok persisten yang dapat dipasang (*attached*) ke instans komputasi.
+OpenStack splits persistent storage into two foundational services: **Glance** for virtual machine operating system templates (*disk images*), and **Cinder** for attachable block volumes (*persistent disks*).
 
 ---
 
-## 1. Glance: Image Service
+## 1. Glance: Image Registry Architecture
 
-Glance bertindak sebagai katalog dan *registry* file ISO/QCOW2/RAW yang digunakan untuk *booting* virtual machine.
+Glance acts as a registry and metadata catalog for raw OS images, cloud-init templates, and ISO installers.
 
-### Perbandingan Format Image: RAW vs QCOW2
+### Image Format Comparison: RAW vs. QCOW2
 
-| Parameter | QCOW2 | RAW |
+| Metric | QCOW2 | RAW |
 |---|---|---|
-| **Ukuran File di Disk** | Kecil (*sparse & compressed*), hemat ruang penyimpanan awal. | Besar (sesuai ukuran disk penuh yang dialokasikan). |
-| **Kecepatan Boot Pertama** | Relatif lebih lambat karena Nova harus mengonversi atau membuat copy-on-write overlay. | **Sangat cepat**, Nova dapat langsung membuat instans instan melalui sparse copy. |
-| **Kinerja I/O** | Sedikit *overhead* translasi sektor dinamis. | **Performa native terbaik** mendekati bare-metal I/O. |
-| **Rekomendasi Ceph RBD** | Kurang optimal (harus dikonversi ke RAW sebelum kloning). | **Wajib untuk fitur instant copy-on-write Ceph.** |
+| **Storage Efficiency** | Sparse and compressed; minimizes initial disk storage requirements. | Allocates full disk geometry immediately; larger footprint on disk. |
+| **First Boot Latency** | Higher; Nova must unpack or generate an overlay during initialization. | **Lowest**; instances can clone directly via sparse copying. |
+| **I/O Throughput** | Slight translation overhead during dynamic block expansion. | **Native performance**; near-zero virtualization penalty. |
+| **Ceph RBD Suitability** | Non-optimal; must be converted to RAW before fast cloning. | **Required** for Ceph copy-on-write instantaneous provisioning. |
 
-### Upload Image Minimalis (CirrOS / Ubuntu Cloud Image):
+### CLI Image Upload:
 ```bash
-# Upload CirrOS Image untuk pengujian hemat memori
+# Upload a lightweight CirrOS test image
 openstack image create "cirros-0.6.2" \
   --file cirros-0.6.2-x86_64-disk.img \
   --disk-format qcow2 \
@@ -36,34 +36,34 @@ openstack image create "cirros-0.6.2" \
 
 ## 2. Cinder: Persistent Block Storage
 
-Instance VM yang di-*boot* langsung dari Glance ephemeral disk akan kehilangan datanya saat VM dihancurkan (*terminated*). Cinder menyediakan volume blok persisten yang bertahan melampaui siklus hidup instans.
+Ephemeral disks provisioned via Nova are discarded upon instance deletion. Cinder manages lifecycle and attachment for block volumes that persist independently.
 
-### Arsitektur Komponen Cinder:
-1. **`cinder-api`:** Titik kontak REST API untuk pengguna dan Nova.
-2. **`cinder-scheduler`:** Memilih storage backend atau pool penyimpanan terbaik berdasarkan kuota, IOPS, dan kapasitas kosong.
-3. **`cinder-volume`:** Agen pengelola backend penyimpanan spesifik melalui driver vendor (LVM, Ceph RBD, NetApp, Dell EMC).
+### Component Architecture:
+1. **`cinder-api`:** Authenticates and routes volume management calls from users and Nova.
+2. **`cinder-scheduler`:** Evaluates backend pools against requested size, type, IOPS capabilities, and availability zones.
+3. **`cinder-volume`:** Interacts with physical storage backends via driver modules (Ceph RBD, LVM/iSCSI, NFS, SAN arrays).
 
 ```mermaid
 flowchart LR
-    NovaCompute["Nova Compute (Node 02)"] -->|Permintaan Volume Attach| CinderAPI["Cinder API"]
+    NovaCompute["Nova Compute (Node 02)"] -->|Volume Attach Request| CinderAPI["Cinder API"]
     CinderAPI --> CinderScheduler["Cinder Scheduler"]
     CinderScheduler --> CinderVolume["Cinder Volume Driver"]
-    CinderVolume -->|Target iSCSI / LVM Loopback| StorageBackend[("Storage Pool (LVM / Ceph)")]
-    StorageBackend -.->|Koneksi iSCSI Session| NovaCompute
+    CinderVolume -->|iSCSI Target / LVM Volume| StorageBackend[("Storage Backend (LVM / Ceph)")]
+    StorageBackend -.->|iSCSI Block Session| NovaCompute
 ```
 
 ---
 
-## 3. Homelab Cinder dengan LVM Loopback Driver
+## 3. Homelab LVM Loopback Implementation
 
-Pada setup DevStack homelab 2-node, penyimpanan Cinder disimulasikan menggunakan loopback image file yang diformat sebagai Linux LVM Volume Group (`stack-volumes-default`):
+In constrained DevStack homelab environments, Cinder storage is backed by a loopback image configured as a Linux Logical Volume Manager (LVM) volume group (`stack-volumes-default`):
 
 ```bash
-# Memeriksa volume group aktif di Node 1
+# Inspect active LVM storage pools
 sudo vgs
 sudo lvs
 
-# Membuat volume blok baru via CLI
+# Create and attach a persistent test volume
 openstack volume create --size 5 test-volume-01
 openstack server add volume my-instance test-volume-01
 ```
@@ -72,5 +72,5 @@ openstack server add volume my-instance test-volume-01
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/neutron-ovn' | relative_url }}">&larr; Neutron & OVN</a>
-  <a class="page-nav-btn" href="{{ '/troubleshooting' | relative_url }}">Lanjut: 🔧 Troubleshooting Lab &rarr;</a>
+  <a class="page-nav-btn" href="{{ '/troubleshooting' | relative_url }}">Next: Troubleshooting &rarr;</a>
 </div>

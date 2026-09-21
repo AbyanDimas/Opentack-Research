@@ -1,56 +1,56 @@
 ---
 layout: default
-title: Troubleshooting & Lab Learnings - OpenStack Research Wiki
+title: Troubleshooting - OpenStack Research Documentation
 ---
 
-# 🛠️ Troubleshooting & Lab Learnings
+# Troubleshooting and Diagnostic Guide
 
-Catatan operasional dan pemecahan masalah nyata yang ditemui selama mengoperasikan DevStack pada spesifikasi perangkat keras terbatas (RAM 4GB).
+Operational diagnostics and remediation procedures derived from managing a multi-node DevStack deployment under 4GB RAM constraints.
 
 ---
 
-## 1. Menangani Masalah Out-Of-Memory (OOM Killer)
+## 1. Out-Of-Memory (OOM Killer) Remediation
 
-### Gejala Masalah:
-Proses `mysqld`, `beam.smp` (RabbitMQ), atau `nova-conductor` tiba-tiba mati tanpa pesan kesalahan eksplisit di log aplikasi.
+### Symptoms:
+Key daemons (`mysqld`, `beam.smp` for RabbitMQ, or `nova-conductor`) terminate unexpectedly without prior error messages in service logs.
 
-### Diagnosa:
-Periksa log dmesg sistem:
+### Diagnostics:
+Inspect the kernel ring buffer:
 ```bash
 sudo dmesg -T | grep -i oom
 ```
-Jika terlihat baris *`Out of memory: Killed process <PID> (mysqld)`*, berarti alokasi RAM fisik telah terlampaui.
+If an entry such as `Out of memory: Killed process <PID> (mysqld)` appears, memory pressure has triggered the Linux OOM killer.
 
-### Solusi:
-1. **Tingkatkan Ukuran Swap:** Pastikan swap berukuran minimal 8GB–10GB aktif.
-2. **Batasi Buffer Pool MySQL:** Tambahkan konfigurasi pembatas memori di `/etc/mysql/mariadb.conf.d/50-server.cnf`:
+### Resolution Steps:
+1. **Verify Swap Space:** Ensure an 8GB–10GB swapfile is mounted with active priority.
+2. **Constrain MySQL Buffer Pool:** Restrict memory limits in `/etc/mysql/mariadb.conf.d/50-server.cnf`:
    ```ini
    [mysqld]
    innodb_buffer_pool_size = 256M
    max_connections = 100
    ```
-3. **Nonaktifkan Layanan Non-Kritis:** Matikan Horizon dashboard, Aodh, Ceilometer, dan Heat pada `local.conf`.
+3. **Decommission Telemetry:** Ensure Ceilometer, Aodh, and Heat are disabled in `local.conf`.
 
 ---
 
-## 2. RabbitMQ Connection Timeout & Heartbeat Lost
+## 2. AMQP Connection Timeouts & Heartbeat Loss
 
-### Gejala Masalah:
-Nova Compute di Node 2 gagal melaporkan status ke Nova Controller di Node 1:  
-*`AMQP server on 192.168.101.142:5672 is unreachable`* atau *`Heartbeat timeout on AMQP connection`*.
+### Symptoms:
+Nova Compute on Node 2 reports communication failure to the controller:  
+`AMQP server on 192.168.101.142:5672 is unreachable` or `Heartbeat timeout on AMQP connection`.
 
-### Solusi:
-1. Verifikasi listener port 5672 di Node 1:
+### Resolution Steps:
+1. Check port 5672 listener status on Node 1:
    ```bash
    sudo ss -tulpn | grep 5672
    sudo rabbitmqctl status
    ```
-2. Pastikan user RabbitMQ dan virtual host terdaftar:
+2. Verify rabbitmq users and permissions:
    ```bash
    sudo rabbitmqctl list_users
    sudo rabbitmqctl list_permissions -p /
    ```
-3. Sesuaikan timeout heartbeat di `/etc/nova/nova.conf`:
+3. Extend heartbeat thresholds in `/etc/nova/nova.conf`:
    ```ini
    [oslo_messaging_rabbit]
    heartbeat_timeout_threshold = 60
@@ -59,44 +59,44 @@ Nova Compute di Node 2 gagal melaporkan status ke Nova Controller di Node 1:
 
 ---
 
-## 3. Instance Tidak Mendapat IP Address (OVN Metadata & DHCP)
+## 3. DHCP and Metadata Resolution Failures in OVN
 
-### Gejala Masalah:
-Instance berhasil dibuat di Node 2, namun terhenti pada *cloud-init* dan tidak mendapatkan alamat IP dari DHCP.
+### Symptoms:
+New virtual machine instances enter the `ACTIVE` state but fail to acquire an IP address via cloud-init.
 
-### Diagnosa & Solusi:
-1. Periksa sinkronisasi database OVN:
+### Diagnostics and Remediation:
+1. Inspect logical flows and OVSDB status:
    ```bash
    sudo ovn-nbctl show
    sudo ovn-sbctl show
    ```
-2. Jika ada ketidaksesuaian antara state Neutron dan OVN, jalankan utilitas sinkronisasi:
+2. Execute a database resynchronization:
    ```bash
    neutron-ovn-db-sync-util \
      --config-file /etc/neutron/neutron.conf \
      --config-file /etc/neutron/plugins/ml2/ml2_conf.ini
    ```
-3. Pastikan agen `ovn-controller` di Node 2 terhubung sempurna ke Southbound DB di Node 1:
+3. Verify the Southbound DB remote target on Node 2:
    ```bash
    sudo ovs-vsctl get open . external_ids:ovn-remote
-   # Output harus mengarah ke: tcp:192.168.101.142:6642
+   # Expected output: tcp:192.168.101.142:6642
    ```
 
 ---
 
-## 4. Memeriksa Layanan DevStack Berbasis Systemd
+## 4. Systemd Service Inspection for DevStack
 
-Pada rilis DevStack modern, seluruh service dikelola via *systemd user session* di bawah akun `stack`:
+In modern DevStack environments, daemons run as user units under the `stack` account:
 
 ```bash
-# Melihat daftar seluruh service OpenStack yang aktif
+# List all active OpenStack systemd units
 systemctl --user list-units "devstack@*"
 
-# Memeriksa log real-time service tertentu
+# Stream logs for a specific service
 journalctl --user -u devstack@n-cpu.service -f --no-tail
 journalctl --user -u devstack@q-svc.service -f --no-tail
 
-# Merestart layanan tertentu tanpa menjalankan unstack.sh
+# Restart an individual daemon
 systemctl --user restart devstack@n-cpu.service
 ```
 
@@ -104,5 +104,5 @@ systemctl --user restart devstack@n-cpu.service
 
 <div class="page-nav-box">
   <a class="page-nav-btn" href="{{ '/storage-glance-cinder' | relative_url }}">&larr; Glance & Cinder</a>
-  <a class="page-nav-btn" href="{{ '/' | relative_url }}">Kembali ke Beranda Wiki 🏠</a>
+  <a class="page-nav-btn" href="{{ '/' | relative_url }}">Return to Overview &rarr;</a>
 </div>
