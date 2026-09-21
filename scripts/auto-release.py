@@ -153,13 +153,13 @@ def main():
     run_cmd('git config user.name "github-actions[bot]"')
     run_cmd('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
 
-    # Commit CHANGELOG.md and create Git tag
-    run_cmd(f'git commit -am "chore(release): {new_tag} [skip ci]"', check=False)
+    # Create Git tag directly on the current commit
+    print(f"Tagging current HEAD with {new_tag}...")
     run_cmd(f'git tag -a "{new_tag}" -m "Release {new_tag}"')
 
-    # Push commit and tag to origin
-    print(f"Pushing commit and {new_tag} to origin pages...")
-    run_cmd(f'git push origin pages "{new_tag}"')
+    # Push tag to origin
+    print(f"Pushing {new_tag} to origin...")
+    run_cmd(f'git push origin "{new_tag}"')
 
     # Create GitHub Release
     print(f"Creating GitHub Release {new_tag}...")
