@@ -1,5 +1,12 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+## [1.2.0](https://github.com/AbyanDimas/Opentack-Research/compare/v1.1.0...v1.2.0) (2026-09-21)
+
+### Features
+- feat: switch to direct automated releases without release pull requests ([6f34de1](https://github.com/AbyanDimas/Opentack-Research/commit/6f34de1537c1798db3b5abe37c12b1c775f003e1))
+
 ## [1.1.0](https://github.com/AbyanDimas/Opentack-Research/compare/v1.0.0...v1.1.0) (2026-09-21)
 
 
