@@ -79,19 +79,28 @@ jobs:
         uses: actions/upload-pages-artifact@v3
 
   release:
-    name: Release Please
+    name: Automatic Release
     needs: [lint]
     if: github.ref == 'refs/heads/pages' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Run Release Please
-        uses: googleapis/release-please-action@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
-          release-type: simple
-          target-branch: pages
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Direct Automated Release
+        run: |
+          python3 scripts/auto-release.py
 
   deploy:
     name: Deploy to GitHub Pages
